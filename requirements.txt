@@ -10,7 +10,6 @@ flake8==6.0.0
 h11==0.14.0
 httptools==0.5.0
 idna==3.4
--e git+https://github.com/YasuhiroOsajima/mantine-table-app-api.git@1e8aaf3eb883730ed9805c040a7ac933ca755cce#egg=mantine_table_app_api
 mccabe==0.7.0
 passlib==1.7.4
 pyasn1==0.4.8
