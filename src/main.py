@@ -3,9 +3,14 @@ from datetime import timedelta
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-
-
-
+from model import Token, User
+from util import (
+    authenticate_user,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    fake_users_db,
+    create_access_token,
+    get_current_active_user,
+)
 
 app = FastAPI()
 

@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
+from model import TokenData, User, UserInDB
 
 
 # to get a string like this run:
@@ -15,10 +16,10 @@ ALGORITHM = "RS512"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        "full_name": "John Doe",
-        "email": "johndoe@example.com",
+    "testuser": {
+        "username": "testuser",
+        "full_name": "Test User",
+        "email": "testuser@example.com",
         "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # noqa: E501
         "disabled": False,
     }
