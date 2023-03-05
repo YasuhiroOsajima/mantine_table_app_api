@@ -6,6 +6,7 @@ from auth_logic import (
     get_current_active_user,
     generate_new_access_token,
     register_new_user,
+    disable_token,
     TOKEN_URL
 )
 
@@ -33,3 +34,8 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 @app.post("/users", response_model=User)
 async def register_access(user_request: UserInRequest = Depends()):
     return register_new_user(user_request)
+
+
+@app.delete(f"/{TOKEN_URL}")
+async def disable_access_token(result: bool = Depends(disable_token)):
+    return {"message": "Token disabled"}
