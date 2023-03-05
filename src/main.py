@@ -2,7 +2,7 @@ from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 
 from model import Token, User
-from util import (
+from auth_logic import (
     get_current_active_user,
     generate_new_access_token,
     TOKEN_URL

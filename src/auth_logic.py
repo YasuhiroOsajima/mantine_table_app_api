@@ -7,6 +7,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 from model import User, UserInDB
+from db import get_user_from_db
 
 
 # to get a string like this run:
@@ -19,16 +20,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 TIME_DELTA_MINUTES = 15
 
 TOKEN_URL = "token"
-
-fake_users_db = {
-    "testuser": {
-        "username": "testuser",
-        "full_name": "Test User",
-        "email": "testuser@example.com",
-        "hashed_password": "$2b$12$XQj9GdQCWnByERsz0N0EpulcUK6Wx13iKyN9P6l6g9cF9Kf9.50qa",  # noqa: E501
-        "disabled": False,
-    }
-}
 
 
 pwd_context = CryptContext(schemes=["bcrypt"],
@@ -46,20 +37,9 @@ def _verify_password(plain_password,
                               hashed_password)
 
 
-def _get_user(db, username: str) -> Union[UserInDB, None]:
-    user_in_db = None
-
-    if username in db:
-        user_dict = db[username]
-        user_in_db = UserInDB(**user_dict)
-
-    return user_in_db
-
-
 def _authenticate_user(username: str,
                        password: str) -> Union[UserInDB, None]:
-    user = _get_user(fake_users_db,
-                     username)
+    user = get_user_from_db(username)
 
     if not user:
         return None
@@ -123,8 +103,7 @@ async def _get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
     except JWTError:
         raise credentials_exception
 
-    user = _get_user(fake_users_db,
-                     username=username)
+    user = get_user_from_db(username=username)
 
     if user is None:
         raise credentials_exception
