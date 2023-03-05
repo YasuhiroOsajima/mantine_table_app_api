@@ -10,10 +10,37 @@ from model import TokenData, User, UserInDB
 
 
 # to get a string like this run:
-# openssl rand -hex 32
-SECRET_KEY = "f35580a85721bfd1944377ed69a2084bea8f4b68be586cd74730495e248990e6"
-ALGORITHM = "HS256"
-# ALGORITHM = "RS512"
+# openssl genrsa 2048
+SECRET_KEY = """
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEArNDp6K0k6ezytKF1KkLLizWD+25PaMoGsV7d2MBko8bBng/A
+dpy8Yx10mfQSSH9Euhrt+9IDhye4vpzkDm5YVYq/E+T65FQ62keWDTKP54AjjANJ
+rKDsIPx/cObOxz+Wj/5GzCeriJz6ic2AsbV7o5YUre9VOHr06jWpe4w02ey714Os
+Qv0bisUk7qycTrNgGg9kAbxXR4tzFMJ5M7/jyjiOMSQVpJ0zWmqE1p4m2sCnx61X
+J7hBMX5YAit2ut7HQO0acuyvKCuGPTCsBhp/5ZHOv5v/vj11PhceqPFVcDCzjdbC
+3UlIDVHnhfNEJkG4M6gRi0NaI7ZNb2kqax+F8wIDAQABAoIBAQCF1ZzwpvaJewlT
+Ph8AxY3gl2dJFtrEqoCYaIGiVQ0bkNdtU4GX2jZDBBLDD7QBFR7iiex4MuKsjuSS
+KeqsCmS6iqMEAzcSEPErDnl0aw3rGN9ulTU/TbjQqvr/MqA8ylAN37xwauB7Aic9
+BTt/ZK8Ftzr4oPr8rKxznW9N0P01Lszy4xGhNcd0UH61rXkQf5FsR6Wklj/zOPyu
+YNWDubt2DjEQ3AhEGHsOsyDFuTzfA2rAJLNo/vqQPpRxcXEwYAgJfcVk2p0pMiQZ
+aYtTuDzZTVMhvJwU8DhewKLjTrzc4pm6NBuhBDOA++wQzG6P8zi+hlJxXMWiLde2
+l6cM2CkRAoGBAN0CiDpe0SveC25re//cKHGhBODbWNPkJjqOUjJQAYYQkyf1JCLu
+4dazRRuR4ibZRZPhIJNLdK1YqcWy0v6B6bTqkViKRFyRifRVAhVTCSEL/mZ2wH4n
+C9N5+SI7RDa4BUGfDXG3QCOv09KLte4xrAcWBY7i4JSqNTri0P5QDxGdAoGBAMgt
+GYY6H5CtPXxVtnvLCloUuMpzKwdMyzhEHP3w/ifluMXC4RVmxTOuGxgOitGR7Xcg
+jD4lq+YBrjQwoOrkbMMeokwo9SRGo0dCSeck11JvHhp2HOq6jOPq3qLRb+fp9MFu
+ZhqEXkf1lx1ghzPQ7Nj7/IJv+nfDT0oSFykGwujPAoGBAIfV/pShoj4sAyqitVvU
+nKb6KF1rc3UITNbAkpSJx+X2Wfu9F7DA0d174YXIbA8kizcQr0zYm6XPUMlJ15TF
+lDa11Q9uLAYZDYk2lkk09+9vx7SCWF0w8nvQA+eeNZbME675avHxh2JntvE5HWCA
+9xKD3narywyUcJL4xSsJWbmhAoGAIjJyNdggJFs0MdWCw0tAjXsUxqE+LJUV8prQ
+SSGuiapZEo/kW/+emOGZh1aUqJDBfKR20PcmkriexhO4qeg0HHFTUKd+mZ/nrPjK
+H07P6ilJf0PGVONhxl4Ngss8zuXNBm6Ryt3qLWjrU/11m4iJrdf+n1n59BPNq93D
+TyL0kUkCgYALI/03LxFopzBTk99bxDGCcv4d+KBvw9Jw9T3/j1PVBkvNwQyfM07n
+n6eVCynvfHUVIZENi2fFpjg6yndSsWBvRV2fcIhA/WGbEzOOJye6QDeTqgfFy2cw
+1ulWwS5XBx0fZ4D2fn5O/ImR22ce5e+z8e9eJzcSiHVA0MUFMxDceg==
+-----END RSA PRIVATE KEY-----
+"""
+ALGORITHM = "RS512"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 TIME_DELTA_MINUTES = 15
 
@@ -76,7 +103,9 @@ def _create_access_token(data: dict) -> str:
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode,
+                             SECRET_KEY,
+                             algorithm=ALGORITHM)
 
     return encoded_jwt
 
@@ -109,6 +138,7 @@ async def _get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
     )
 
     try:
+        # Check token validity.
         payload = jwt.decode(token,
                              SECRET_KEY,
                              algorithms=[ALGORITHM])
