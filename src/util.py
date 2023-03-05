@@ -11,17 +11,19 @@ from model import TokenData, User, UserInDB
 
 # to get a string like this run:
 # openssl rand -hex 32
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+SECRET_KEY = "f35580a85721bfd1944377ed69a2084bea8f4b68be586cd74730495e248990e6"
 ALGORITHM = "RS512"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 TIME_DELTA_MINUTES = 15
+
+TOKEN_URL = "token"
 
 fake_users_db = {
     "testuser": {
         "username": "testuser",
         "full_name": "Test User",
         "email": "testuser@example.com",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # noqa: E501
+        "hashed_password": "$2b$12$XQj9GdQCWnByERsz0N0EpulcUK6Wx13iKyN9P6l6g9cF9Kf9.50qa",  # noqa: E501
         "disabled": False,
     }
 }
@@ -29,15 +31,15 @@ fake_users_db = {
 
 pwd_context = CryptContext(schemes=["bcrypt"],
                            deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=TOKEN_URL)
 
 
 def get_password_hash(password) -> str:
     return pwd_context.hash(password)
 
 
-def verify_password(plain_password,
-                    hashed_password) -> bool:
+def _verify_password(plain_password,
+                     hashed_password) -> bool:
     return pwd_context.verify(plain_password,
                               hashed_password)
 
@@ -52,29 +54,25 @@ def _get_user(db, username: str) -> Optional[UserInDB]:
     return user_in_db
 
 
-def authenticate_user(username: str,
-                      password: str) -> Optional[UserInDB]:
+def _authenticate_user(username: str,
+                       password: str) -> Optional[UserInDB]:
     user = _get_user(fake_users_db,
                      username)
 
     if not user:
         return None
 
-    if not verify_password(password,
-                           user.hashed_password):
+    if not _verify_password(password,
+                            user.hashed_password):
         return None
 
     return user
 
 
-def create_access_token(data: dict,
-                        expires_delta: Union[timedelta, None] = None) -> str:
+def _create_access_token(data: dict) -> str:
     to_encode = data.copy()
 
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=TIME_DELTA_MINUTES)
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -82,7 +80,27 @@ def create_access_token(data: dict,
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
+def generate_new_access_token(username: str,
+                              password: str) -> str:
+
+    # Check user name and password validity.
+    user = _authenticate_user(username,
+                              password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Generate access token.
+    access_token = _create_access_token(data={"sub": user.username})
+    return access_token
+
+
+async def _get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
+    """Check target token's validity.
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -90,7 +108,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
     )
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token,
+                             SECRET_KEY,
+                             algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
@@ -99,7 +119,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
     except JWTError:
         raise credentials_exception
 
-    user = _get_user(fake_users_db, username=token_data.username)
+    user = _get_user(fake_users_db,
+                     username=token_data.username)
 
     if user is None:
         raise credentials_exception
@@ -108,7 +129,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
 
 
 async def get_current_active_user(
-        current_user: User = Depends(get_current_user)) -> User:
+        current_user: User = Depends(_get_current_user)) -> User:
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
 
