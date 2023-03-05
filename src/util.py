@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional, Union
+from typing import Optional
 
 from fastapi import Depends,  HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -12,7 +12,8 @@ from model import TokenData, User, UserInDB
 # to get a string like this run:
 # openssl rand -hex 32
 SECRET_KEY = "f35580a85721bfd1944377ed69a2084bea8f4b68be586cd74730495e248990e6"
-ALGORITHM = "RS512"
+ALGORITHM = "HS256"
+# ALGORITHM = "RS512"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 TIME_DELTA_MINUTES = 15
 

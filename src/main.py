@@ -1,3 +1,17 @@
+"""
+# Get new token
+curl -X 'POST' \
+  'http://127.0.0.1:8000/token' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=&username=testuser&password=password&scope=&client_id=&client_secret=' # noqa: E501
+
+# Access with the token
+curl -X 'GET' \
+  'http://127.0.0.1:8000/users/me/' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImV4cCI6MTY3ODAyMjk4MH0.3Lt49TGD0MxutGNcab-mzTSD6axi00bojPWrRF5fQvw'
+"""
 from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -24,6 +38,8 @@ async def login_for_access_token(
 
 @app.get("/users/me/", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    """Get own user account info with token.
+    """
     return current_user
 
 
