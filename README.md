@@ -22,7 +22,7 @@ Access with the token.
 
 ```bash
 curl -X 'GET' \
-  'http://127.0.0.1:8000/users/me/' \
+  'http://127.0.0.1:8000/users/me' \
   -H 'accept: application/json' \
   -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImV4cCI6MTY3ODAyMjk4MH0.3Lt49TGD0MxutGNcab-mzTSD6axi00bojPWrRF5fQvw'
 ```
