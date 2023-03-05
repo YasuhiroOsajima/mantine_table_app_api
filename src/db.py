@@ -1,8 +1,9 @@
+from passlib.context import CryptContext
 from typing import Union
 
-from model import UserInDB
+from model import User, UserInDB, UserInRequest
 
-FAKE_USERS_DB = {
+fake_users_db = {
     "testuser": {
         "username": "testuser",
         "full_name": "Test User",
@@ -12,12 +13,38 @@ FAKE_USERS_DB = {
     }
 }
 
+pwd_context = CryptContext(schemes=["bcrypt"],
+                           deprecated="auto")
+
+
+def _get_password_hash(password) -> str:
+    return pwd_context.hash(password)
+
 
 def get_user_from_db(username: str) -> Union[UserInDB, None]:
     user_in_db = None
 
-    if username in FAKE_USERS_DB:
-        user_dict = FAKE_USERS_DB[username]
+    if username in fake_users_db:
+        user_dict = fake_users_db[username]
         user_in_db = UserInDB(**user_dict)
 
     return user_in_db
+
+
+def add_user_to_db(user_request: UserInRequest) -> Union[User, None]:
+    if user_request.username in fake_users_db:
+        return None
+
+    hashed_password = _get_password_hash(user_request.password)
+    fake_users_db[user_request.username] = {
+        "username": user_request.username,
+        "full_name": user_request.full_name,
+        "email": user_request.email,
+        "hashed_password": hashed_password,
+        "disabled": False,
+    }
+
+    return User(username=user_request.username,
+                email=user_request.email,
+                full_name=user_request.full_name,
+                disabled=user_request.disabled)

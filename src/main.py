@@ -1,10 +1,11 @@
 from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 
-from model import Token, User
+from model import Token, User, UserInRequest
 from auth_logic import (
     get_current_active_user,
     generate_new_access_token,
+    register_new_user,
     TOKEN_URL
 )
 
@@ -29,7 +30,6 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
 
 
-@app.get("/users/me/items")
-async def read_own_items(
-        current_user: User = Depends(get_current_active_user)):
-    return [{"item_id": "Foo", "owner": current_user.username}]
+@app.post("/users", response_model=User)
+async def register_access(user_request: UserInRequest = Depends()):
+    return register_new_user(user_request)

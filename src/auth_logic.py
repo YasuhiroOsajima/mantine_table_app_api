@@ -6,8 +6,8 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from model import User, UserInDB
-from db import get_user_from_db
+from model import User, UserInDB, UserInRequest
+from db import get_user_from_db, add_user_to_db
 
 
 # to get a string like this run:
@@ -25,10 +25,6 @@ TOKEN_URL = "token"
 pwd_context = CryptContext(schemes=["bcrypt"],
                            deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=TOKEN_URL)
-
-
-def get_password_hash(password) -> str:
-    return pwd_context.hash(password)
 
 
 def _verify_password(plain_password,
@@ -117,3 +113,11 @@ async def get_current_active_user(
         raise HTTPException(status_code=400, detail="Inactive user")
 
     return current_user
+
+
+def register_new_user(user_request: UserInRequest) -> bool:
+    registered_user = add_user_to_db(user_request)
+    if registered_user is None:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    return registered_user
