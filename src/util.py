@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from model import TokenData, User, UserInDB
+from model import User, UserInDB
 
 
 # to get a string like this run:
@@ -120,12 +120,11 @@ async def _get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
         if username is None:
             raise credentials_exception
 
-        token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
 
     user = _get_user(fake_users_db,
-                     username=token_data.username)
+                     username=username)
 
     if user is None:
         raise credentials_exception
