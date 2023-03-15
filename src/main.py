@@ -33,7 +33,8 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 
 
 @app.post("/users", response_model=User)
-async def register_access(user_request: UserInRequest = Depends()):
+async def register_access(user_request: UserInRequest):
+    print(user_request)
     return register_new_user(user_request)
 
 
