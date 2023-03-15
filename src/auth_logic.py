@@ -89,7 +89,7 @@ def generate_new_access_token(username: str,
 
     # Generate access token.
     access_token = _create_access_token(data={"sub": user.username})
-    return access_token
+    return (access_token, user.username)
 
 
 def _token_validation(token):
