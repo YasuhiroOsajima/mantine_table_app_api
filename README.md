@@ -15,7 +15,7 @@ curl -X 'POST' \
   'http://127.0.0.1:8000/token' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d 'grant_type=&username=testuser&password=password&scope=&client_id=&client_secret='
+  -d 'username=testuser&password=password'
 ```
 
 Access with the token.
