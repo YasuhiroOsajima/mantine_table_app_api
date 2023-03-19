@@ -3,10 +3,10 @@ from typing import Union
 from pydantic import BaseModel
 
 
-class Token(BaseModel):
+class AuthResponse(BaseModel):
     access_token: str
     token_type: str
-    user: str
+    username: str
 
 
 class User(BaseModel):

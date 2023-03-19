@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 
-from model import Token, User, UserInRequest
+from model import AuthResponse, User, UserInRequest
 from auth_logic import (
     get_current_active_user,
     generate_new_access_token,
@@ -13,7 +13,7 @@ from auth_logic import (
 app = FastAPI()
 
 
-@app.post(f"/{TOKEN_URL}", response_model=Token)
+@app.post(f"/{TOKEN_URL}", response_model=AuthResponse)
 async def login_for_access_token(
         form_data: OAuth2PasswordRequestForm = Depends()):
 
@@ -22,7 +22,7 @@ async def login_for_access_token(
 
     return {"access_token": access_token,
             "token_type": "bearer",
-            "user": user}
+            "username": user}
 
 
 @app.get("/users/me", response_model=User)
