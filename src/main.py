@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 
 from model import AuthResponse, User, UserInRequest
@@ -11,7 +12,16 @@ from auth_logic import (
 )
 
 app = FastAPI()
-
+origins = [
+    "http://127.0.0.1:3000",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post(f"/{TOKEN_URL}", response_model=AuthResponse)
 async def login_for_access_token(
